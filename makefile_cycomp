@@ -1,6 +1,6 @@
-SOURCES = tools.ml ratio.ml options.ml slSyntax.ml slSatcheck.ml slxSyntax.ml slxSatcheck.ml ccSyntax.ml newSyntax.ml new2cc.ml newParser.ml newLexer.ml ccSatcheck.ml ccWand.ml ccFactorAnalysis.ml ccIndDefAnalysis.ml ccEntlcheck.ml ccEntlcheckControl.ml main_cycomp.ml
-CMOS = tools.cmo ratio.cmo options.cmo slSyntax.cmo slSatcheck.cmo slxSyntax.cmo slxSatcheck.cmo ccSyntax.cmo newSyntax.cmo new2cc.cmo newParser.cmo newLexer.cmo ccSatcheck.cmo ccWand.cmo ccFactorAnalysis.cmo ccIndDefAnalysis.cmo ccEntlcheck.cmo ccEntlcheckControl.cmo main_cycomp.cmo
-CMIS = tools.cmi ratio.cmi options.cmi slSyntax.cmi slSatcheck.cmi ccSyntax.cmi slxSatcheck.cmi ccSyntax.cmi newSyntax.cmi new2cc.cmi newParser.cmi newLexer.cmi ccSatcheck.cmi ccWand.cmi ccFactorAnalysis.cmi ccIndDefAnalysis.cmi ccEntlcheck.cmi ccEntlcheckControl.cmi main_cycomp.cmi
+SOURCES = tools.ml ratio.ml options.ml slSyntax.ml slSatcheck.ml slxSyntax.ml slxSatcheck.ml ccSyntax.ml newSyntax.ml new2cc.ml newParser.ml newLexer.ml ccSatcheck.ml ccWand.ml ccFactorAnalysis.ml ccIndDefAnalysis.ml ccEntlcheck.ml ccEntlcheckControl.ml plNormalization.ml main_cycomp.ml
+CMOS = tools.cmo ratio.cmo options.cmo slSyntax.cmo slSatcheck.cmo slxSyntax.cmo slxSatcheck.cmo ccSyntax.cmo newSyntax.cmo new2cc.cmo newParser.cmo newLexer.cmo ccSatcheck.cmo ccWand.cmo ccFactorAnalysis.cmo ccIndDefAnalysis.cmo ccEntlcheck.cmo ccEntlcheckControl.cmo plNormalization.cmo main_cycomp.cmo
+CMIS = tools.cmi ratio.cmi options.cmi slSyntax.cmi slSatcheck.cmi ccSyntax.cmi slxSatcheck.cmi ccSyntax.cmi newSyntax.cmi new2cc.cmi newParser.cmi newLexer.cmi ccSatcheck.cmi ccWand.cmi ccFactorAnalysis.cmi ccIndDefAnalysis.cmi ccEntlcheck.cmi ccEntlcheckControl.cmi plNormalization.cmi main_cycomp.cmi
 TARGET = cycomp
 
 main: $(SOURCES) newParser.mli newParser.cmi

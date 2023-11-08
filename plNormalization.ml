@@ -16,6 +16,25 @@ let rec norm_E (spat : newSyntax.SHspat.t) : string list =
   | WCon (s1,s2) ->
      Tools.unionLst (norm_E s1) (norm_E s2)
 
+let rec check_pto spat : bool =
+  match spat with
+  | Emp -> false
+  | SAtom at ->
+     (match at with
+      | Pto(t,ts) -> true
+      | _ -> false)
+  | SCon(s1,s2) -> (check_pto s1) || (check_pto s2)
+  | _ -> false
+
+let rec ls_to_pure spat =
+  match spat with
+  | Emp -> []
+  | SAtom(Pr(p,t1::t2::[])) ->
+     if p = "ls" then [Eq(t1,t2)] else []
+  | SAtom(_) -> []
+  | SCon(s1,s2) -> (ls_to_pure s1) @ (ls_to_pure s2)
+  | _ -> []
+
 (* n_p(Pi,L) *)
 let norm_p (pure : newSyntax.SHpure.t) (labs : string list) : newSyntax.SHpure.t =
   match pure with
@@ -27,9 +46,12 @@ let norm_p (pure : newSyntax.SHpure.t) (labs : string list) : newSyntax.SHpure.t
      | At(a,spat) ->
         if (List.mem a labs)
         then 
-          if (Emp <> )
-          Nil <> Nil 
-          else 
+          if (check_pto spat)
+          then
+            NEq(nil,nil)::At(a,Emp)::[]
+          else
+            let pure = ls_to_pure spat in
+            At(a,Emp)::pure
         else At(a,spat)::(norm_p rest labs)
 
 (* extract_labels s1n labels -> (spat1, spat2)
@@ -53,12 +75,23 @@ let rec extract_labels (spat : newSyntax.SHspat.t) (labs : string list) =
      (s1l @ s2l, SCon(s1r,s2r))
   | WCon(s1,s2) -> ([],Emp)
 
+let rec check_lab a s =
+  match s with
+  | Lab b _ -> a = b
+  | _ -> false
+
+(* findOption : (SHspatExp -> bool) -> SHspatExp list -> SHspatExp option
+   check_lab : string -> SHspatExp -> bool
+   check_lab a : SHspatExp -> bool *)
+
 let rec add_permission (l1 : SHspatExp list) (l2 : SHspatExp list) =
   match l1 with
   | [] -> Emp
   | (Lab a p1) :: rest ->
-    let Lab a p2 = Tools.findItemOption (Lab a _) l2 in
-     Scon(Lab a (Ratio.+/ p1 p2), add_permission rest l2)
+     match Tools.findOption (check_lab a) l2 with
+     | Some (Lab a p2) =
+         Scon(Lab a (Ratio.+/ p1 p2), add_permission rest l2)
+     | _ -> Emp
   | _ -> Emp
 
 (* n_s(Sigma) *)  
