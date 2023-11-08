@@ -26,7 +26,10 @@ let norm_p (pure : newSyntax.SHpure.t) (labs : string list) : newSyntax.SHpure.t
      | NEq(t1,t2) -> NEq(t1,t2)::(norm_p rest labs)
      | At(a,spat) ->
         if (List.mem a labs)
-        then ...
+        then 
+          if (Emp <> )
+          Nil <> Nil 
+          else 
         else At(a,spat)::(norm_p rest labs)
 
 (* extract_labels s1n labels -> (spat1, spat2)
@@ -45,16 +48,17 @@ let rec extract_labels (spat : newSyntax.SHspat.t) (labs : string list) =
     | _ -> (Emp,spat)
   )
   | SCon(s1,s2) ->
-     let (s1l,s1r) -> extract_labels s1 labs in
-     let (s2l,s1r) -> extract_labels s2 labs in
+     let (s1l,s1r) = extract_labels s1 labs in
+     let (s2l,s2r) = extract_labels s2 labs in
      (s1l @ s2l, SCon(s1r,s2r))
   | WCon(s1,s2) -> ([],Emp)
 
 let rec add_permission (l1 : SHspatExp list) (l2 : SHspatExp list) =
   match l1 with
   | [] -> Emp
-  | (Lab a p) :: rest ->
-     Scon( (* add permission of a *), add_permission rest l2)
+  | (Lab a p1) :: rest ->
+    let Lab a p2 = Tools.findItemOption (Lab a _) l2 in
+     Scon(Lab a (Ratio.+/ p1 p2), add_permission rest l2)
   | _ -> Emp
 
 (* n_s(Sigma) *)  
@@ -71,6 +75,7 @@ let rec norm_s (spat : newSyntax.SHspat.t) : newSyntax.SHspat.t =
      let (s2l,s2r) = extract_lables s2n commonlabels in
      let spat1 = add_permission s1l s2l in
      SCon(spat1, SCon(s1r, s2r))
+  | Scon(s1, s2) -> Wcon(s1, s2)
      
 
 let normalization (phi : newSyntax.SH.t) : newSyntax.SH.t =
