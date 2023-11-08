@@ -29,16 +29,49 @@ let norm_p (pure : newSyntax.SHpure.t) (labs : string list) : newSyntax.SHpure.t
         then ...
         else At(a,spat)::(norm_p rest labs)
 
-  
+(* extract_labels s1n labels -> (spat1, spat2)
+      s1n = spatial formulas without WCon
+      labels = list of labels
+      spat1 = label part of s1n (list)
+      spat2 = rest of s1n
+ *)
+
+let rec extract_labels (spat : newSyntax.SHspat.t) (labs : string list) =
+  match spat with
+  | Emp -> ([],Emp)
+  | SAtom s -> (
+    match s with
+    | Lab a p -> if List.mem a labs then ([s],Emp) else ([],spat)
+    | _ -> (Emp,spat)
+  )
+  | SCon(s1,s2) ->
+     let (s1l,s1r) -> extract_labels s1 labs in
+     let (s2l,s1r) -> extract_labels s2 labs in
+     (s1l @ s2l, SCon(s1r,s2r))
+  | WCon(s1,s2) -> ([],Emp)
+
+let rec add_permission (l1 : SHspatExp list) (l2 : SHspatExp list) =
+  match l1 with
+  | [] -> Emp
+  | (Lab a p) :: rest ->
+     Scon( (* add permission of a *), add_permission rest l2)
+  | _ -> Emp
+
 (* n_s(Sigma) *)  
 let rec norm_s (spat : newSyntax.SHspat.t) : newSyntax.SHspat.t =
   match spat with
-  | SAtom a -> a
   | Emp -> Emp
-  | Wcon (s1,s2) -> 
-  | Scon (s1,s2) -> norm_s (Wcon (s1,s2))
-    
-
+  | SAtom s -> SAtom s
+  | WCon(s1, s2) ->
+     let s1n = norm_s s1 in
+     let s2n = norm_s s2 in
+     let commonlabels =
+       Tools.interLst (newSyntax.SHspat.lab s1n) (newSyntax.SHspat.lab s2n) in
+     let (s1l,s1r) = extract_lables s1n commonlabels in
+     let (s2l,s2r) = extract_lables s2n commonlabels in
+     let spat1 = add_permission s1l s2l in
+     SCon(spat1, SCon(s1r, s2r))
+     
 
 let normalization (phi : newSyntax.SH.t) : newSyntax.SH.t =
   let (pure, spat) = phi in
