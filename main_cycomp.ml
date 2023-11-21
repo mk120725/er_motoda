@@ -9,7 +9,7 @@ open CcSyntax
 open NewSyntax
 open New2cc
 open NewParser
-(* open PlNormalization *)
+open PlNormalization
 open CcSatcheck
 open SlSyntax
 open CcEntlcheck
@@ -94,10 +94,17 @@ let () =
    *)
 
   NewSyntax.Entl.println entl;
+  let ant = normalization entl.ant in
+  let suc = normalization entl.suc in
 
+  NewSyntax.SH.println ant;
+  NewSyntax.SH.println suc;
+
+  (*
   let ccentl = New2cc.new2cc_entl entl in
   
   CcSyntax.Entl.println ccentl;
+   *)
   
   (* inductive def. for ls(x,y) (nonempty)
      ls(x,y) = x->y | ex z(x->z * ls(z,y) *)
