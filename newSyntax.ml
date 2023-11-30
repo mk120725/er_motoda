@@ -13,7 +13,7 @@ let dropfilter cond = List.filter (fun x -> not(cond x))
 let rec add t ts =
   match ts with
   | [] -> [t]
-  | t1::rest -> if t=t1 then rest else t1::(add t rest)
+  | t1::rest -> if t=t1 then (add t rest) else t1::(add t rest)
 ;;
 let rec union l1 l2 =
   match l1 with
@@ -23,7 +23,7 @@ let rec union l1 l2 =
 let rec map_union f l =
   match l with
   | [] -> []
-  | x::rest -> union (f x) (map_union f l)
+  | x::rest -> union (f x) (map_union f rest)
 
 (*----------------------------------------------*)
 (* Terms of Symbolic Heap                       *)
@@ -41,7 +41,7 @@ module SHterm = struct
 	match t with
 	| Nil -> "Nil"
 	| Var v -> v
-
+  
   let print t = print_string (to_string t)
 
   let println t = print_string ((to_string t)^"\n")
@@ -344,6 +344,8 @@ module Entl = struct
 	  mutable ant : SH.t;
 	  mutable suc : SH.t;
 	}
+
+  let create up ant suc = { up = up; ant = ant; suc = suc }
   
   let fv e = union (SH.fv e.ant) (SH.fv e.suc)
 

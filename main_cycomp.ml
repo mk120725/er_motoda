@@ -93,21 +93,10 @@ let () =
      = List.map new2cc entls_lf
    *)
 
-  NewSyntax.Entl.println entl;
-  let ant = normalization entl.ant in
-  let suc = normalization entl.suc in
-
-  NewSyntax.SH.println ant;
-  NewSyntax.SH.println suc;
-
-  (*
-  let ccentl = New2cc.new2cc_entl entl in
-  
-  CcSyntax.Entl.println ccentl;
-   *)
-  
   (* inductive def. for ls(x,y) (nonempty)
      ls(x,y) = x->y | ex z(x->z * ls(z,y) *)
+
+  (* def of ls *)
   let var = CcSyntax.var in
   let ls_def : CcSyntax.IndSys.t = [
       ("ls",
@@ -123,6 +112,57 @@ let () =
       )
     ] in
   CcSyntax.IndSys.println ls_def;
+
+  
+  NewSyntax.Entl.println entl;
+  let ant = normalization entl.ant in
+  let suc = normalization entl.suc in
+  let nfentl = NewSyntax.Entl.create [] ant suc in
+  let nfentls = [nfentl] in
+  NewSyntax.Entl.println nfentl;
+  let fvs = Tools.unionLst (NewSyntax.SH.fv ant) (NewSyntax.SH.fv suc) in
+  let tfvs = NewSyntax.SHterm.Nil::(List.map (fun x -> NewSyntax.SHterm.Var x) fvs) in
+  let tpairs = Tools.makeCombPairs tfvs in
+
+  (* for debug *)
+  let rec print_terms ts =
+    match ts with
+    | [] -> ()
+    | t::rest -> NewSyntax.SHterm.println t;
+                 print_terms rest
+  in
+  
+  let rec print_pairs ps =
+    match ps with
+    | [] -> ()
+    | (t1,t2)::rest -> print_string(
+                           "(" ^ (NewSyntax.SHterm.to_string t1)
+                           ^ ","
+                           ^ (NewSyntax.SHterm.to_string t2) ^ ")\n");
+                       print_pairs rest
+  in
+
+  (* Case analysis *)
+  let newsatcheck (ent : NewSyntax.Entl.t) =
+    let ccent = New2cc.new2cc_entl ent in
+    CcSatcheck.decideSatMain(ccent,ls_def)
+  in
+
+  (* case_each [ent1;...; entn] (t1,t2) -> entailment_list
+     for each enti, add t1=t2 & enti, t1/=t2 & enti
+     then, newsatcheck for each entailment *)
+  let rec entls (t1,t2) =
+    []
+  in
+
+  print_string ""
+
+  (*
+  let ccentl = New2cc.new2cc_entl entl in
+  
+  CcSyntax.Entl.println ccentl;
+   *)
+ 
                                  
 (*
   let ps = parse str in
