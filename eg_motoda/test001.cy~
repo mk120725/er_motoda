@@ -1,0 +1,5 @@
+# test01.cy
+# 
+@(a,ls(y,x)) && ls(x,y) w* a^(2/4) * ls(z,w)
+|-
+ls(x,y)
