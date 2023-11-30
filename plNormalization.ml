@@ -109,7 +109,7 @@ let rec norm_s (spat : SHspat.t) : SHspat.t =
      let (s2l,s2r) = extract_labels s2n commonlabels in
      let spat1 = add_permission s1l s2l in
      SCon(spat1, SCon(s1r, s2r))
-  | SCon(s1, s2) -> WCon(s1, s2)
+  | SCon(s1, s2) -> norm_s(WCon(s1, s2))
      
 
 let normalization (phi : SH.t) : SH.t =
