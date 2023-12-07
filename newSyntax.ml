@@ -330,6 +330,10 @@ module SH = struct
     
   let subst (sub : (string * SHterm.t) list) (pure, spat) =
     (SHpure.simpl (SHpure.subst sub pure), SHspat.subst sub spat)
+
+  let add_pureexp (h : t) (t : SHpureExp.t) =
+    match h with
+    | (p,s) -> (t::p,s)
 end
 
 
@@ -367,4 +371,6 @@ module Entl = struct
   let subst (sub : (string * SHterm.t) list) e =
     { up = e.up; ant = SH.subst sub e.ant; suc = SH.subst sub e.suc }
 
+  let add_pureexp (e : t) (t : SHpureExp.t) =
+    { up = e.up; ant = SH.add_pureexp e.ant t; suc = e.suc }
 end

@@ -111,7 +111,7 @@ let () =
        ]
       )
     ] in
-  CcSyntax.IndSys.println ls_def;
+  (*CcSyntax.IndSys.println ls_def; *)
 
   
   NewSyntax.Entl.println entl;
@@ -132,6 +132,13 @@ let () =
                  print_terms rest
   in
   
+  let rec print_entls ts =
+    match ts with
+    | [] -> ()
+    | t::rest -> NewSyntax.Entl.println t;
+                 print_entls rest
+  in
+
   let rec print_pairs ps =
     match ps with
     | [] -> ()
@@ -153,27 +160,43 @@ let () =
      then, newsatcheck for each entailment *)
   let rec case_each (entls : NewSyntax.Entl.t list) (t1,t2) : NewSyntax.Entl.t list =
     match entls with 
-    | [] -> ()
+    | [] -> []
     | t::rest -> 
-      let case_eq  = Eq(t1,t2)::t in
-      let case_neq = Neq(t1,t2)::t in
+      let sub = 
+        match (t1,t2) with
+        | (NewSyntax.SHterm.Nil,NewSyntax.SHterm.Nil) -> []
+        | (NewSyntax.SHterm.Nil,NewSyntax.SHterm.Var s) -> [(s,NewSyntax.SHterm.Nil)]
+        | (NewSyntax.SHterm.Var s,_) -> [(s,t2)]  
+      in
+      let case_eq  = 
+        NewSyntax.Entl.subst sub t in 
+      let case_neq = 
+        NewSyntax.Entl.add_pureexp t (NewSyntax.SHpureExp.NEq(t1,t2)) in 
+
       if (newsatcheck case_eq)
       then
         if (newsatcheck case_neq)
         then
-          (case_eq,case_neq,(case_each rest (t1,t2)))
+          case_eq::case_neq::(case_each rest (t1,t2))
         else
-          (case_eq,(case_each rest (t1,t2)))
+          case_eq::(case_each rest (t1,t2))
       else
-      then
         if (newsatcheck case_neq)
         then
-          (case_neq,(case_each rest (t1,t2)))
+          case_neq::(case_each rest (t1,t2))
         else
-          case_each rest (t1,t2)
+          case_each rest (t1,t2) 
   in
 
-  print_string ""
+  let rec case_each2 (entls : NewSyntax.Entl.t list) ts : NewSyntax.Entl.t list =
+    match ts with
+    | [] -> entls
+    | p::rest -> case_each2 (case_each entls p) rest
+  in
+  
+  print_string "------\n";
+  print_pairs tpairs;
+  print_entls (case_each2 nfentls tpairs)
 
   (*
   let ccentl = New2cc.new2cc_entl entl in
