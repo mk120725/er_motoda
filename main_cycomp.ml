@@ -151,8 +151,26 @@ let () =
   (* case_each [ent1;...; entn] (t1,t2) -> entailment_list
      for each enti, add t1=t2 & enti, t1/=t2 & enti
      then, newsatcheck for each entailment *)
-  let rec entls (t1,t2) =
-    []
+  let rec case_each (entls : NewSyntax.Entl.t list) (t1,t2) : NewSyntax.Entl.t list =
+    match entls with 
+    | [] -> ()
+    | t::rest -> 
+      let case_eq  = Eq(t1,t2)::t in
+      let case_neq = Neq(t1,t2)::t in
+      if (newsatcheck case_eq)
+      then
+        if (newsatcheck case_neq)
+        then
+          ((case_eq::case_neq),(case_each rest (t1,t2)))
+        else
+          ((case_eq),(case_each rest (t1,t2)))
+      else
+      then
+        if (newsatcheck case_neq)
+        then
+          ((case_neq),(case_each rest (t1,t2)))
+        else
+          case_each rest (t1,t2)
   in
 
   print_string ""
