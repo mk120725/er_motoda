@@ -161,14 +161,14 @@ let () =
       then
         if (newsatcheck case_neq)
         then
-          ((case_eq::case_neq),(case_each rest (t1,t2)))
+          (case_eq,case_neq,(case_each rest (t1,t2)))
         else
-          ((case_eq),(case_each rest (t1,t2)))
+          (case_eq,(case_each rest (t1,t2)))
       else
       then
         if (newsatcheck case_neq)
         then
-          ((case_neq),(case_each rest (t1,t2)))
+          (case_neq,(case_each rest (t1,t2)))
         else
           case_each rest (t1,t2)
   in
