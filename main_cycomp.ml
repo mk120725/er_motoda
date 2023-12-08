@@ -155,6 +155,10 @@ let () =
     CcSatcheck.decideSatMain(ccent,ls_def)
   in
 
+  print_string "---new2cc---\n";
+  CcSyntax.Entl.println (New2cc.new2cc_entl nfentl);
+  print_string "------\n";
+  
   (* case_each [ent1;...; entn] (t1,t2) -> entailment_list
      for each enti, add t1=t2 & enti, t1/=t2 & enti
      then, newsatcheck for each entailment *)
