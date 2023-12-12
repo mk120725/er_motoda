@@ -2,7 +2,7 @@
 open SlSyntax;;
 open Tools;;
 
-module OptSC = Options.Satchecker
+module OptSat = Options.Satchecker
 
 exception Unsat_Found;;
 
@@ -95,14 +95,13 @@ module BasePair = struct
 end;;
 
 (* Tensor in Brotherston's paper *)
-let tensor vars = 
+let tensor tt = 
   let module P = SHpureExp in
   let module T = SHterm in
-  let varTm = List.map (fun x -> SHterm.Var x) vars in
-  let combpairL = makeCombPairs varTm in
-  let neqVars = List.map (fun (x,y) -> P.Neq(x,y)) combpairL in
-  let neqNil = List.map (fun x -> P.Neq(x,T.Nil)) varTm in
-  neqVars@neqNil;;
+  let combpairL = makeCombPairs tt in
+  let neqTerms = List.map (fun (x,y) -> P.Neq(x,y)) combpairL in
+  let neqNil = List.map (fun t -> P.Neq(t,T.Nil)) tt in
+  neqTerms@neqNil;;
 
 let tensor2 vars1 vars2 = 
   let module P = SHpureExp in
@@ -320,11 +319,11 @@ module Yvec = struct
     match spex with
     | S.Ind(pr,tmL) ->
        begin
-	 match getInfo yy pr with
-	 | [] -> []
-	 | (prms,bpL)::_ ->
-	    if List.length tmL <> List.length prms then []
-	    else List.concat (List.map (BasePair.subst (zipLst prms tmL)) bpL)
+	     match getInfo yy pr with
+	     | [] -> []
+	     | (prms,bpL)::_ ->
+	        if List.length tmL <> List.length prms then []
+	        else List.concat (List.map (BasePair.subst (zipLst prms tmL)) bpL)
        end
     | _ -> []
 
@@ -375,9 +374,9 @@ let funcIdef is pr n (yy : Yvec.t) : BasePair.t list =
   let module T = SHterm in
   let makeHdBasepair syhp =
     let (pu,sp) = syhp in    
-    let allocL = SHspat.allocTerms sp in    
-    let vars = T.extractVars allocL in
-    let pure = (tensor vars)@pu in
+    let allocL = SHspat.allocTerms sp in
+    let vars = SHterm.extractVars allocL in
+    let pure = (tensor allocL)@pu in
     (vars,pure,[])
   in
   let mergeBasepair bpt1 bpt2 =
@@ -460,7 +459,8 @@ let computeBasePair is =
     yy1 := funcY is !yy1;
   done;
   let yy_result = !yy1 in
-  (!rcd, yy_result);;
+  (!rcd, yy_result)
+;;
 
 
 exception Evidence_Found of (string list * SHpure.t * UnfoldTr.t) ;;  
@@ -471,7 +471,7 @@ let satcheckCore checkBPT (yy : Yvec.t) (sh : SH.t) =
     let (pu,sp) = syhp in
     let allocL = SHspat.allocTerms sp in
     let vars = SHterm.extractVars allocL in
-    let pure = (tensor vars)@pu in
+    let pure = (tensor allocL)@pu in
     (vars,pure,[])
   in
   let mergeBasepair bpt1 bpt2 =
@@ -588,8 +588,11 @@ let createModel is (sh : SH.t) tr : SH.t option =
 (* Deciding SH                          *)
 (*--------------------------------------*)
 let decideSat is sh =
+  OptSat.doifDebug print_endline "** SlSymbolic Heap";
+  OptSat.doifDebug SlSyntax.SH.println sh;
+  OptSat.doifDebug print_endline "---------";  
   let (record,yy) = computeBasePair is in
-  match satcheck yy sh, Options.Satchecker.modelFlag () with
+  match satcheck yy sh, OptSat.modelFlag () with
   | None,_ -> (None,record)
   | Some(vv,pp,tr),true ->
 	 let model = createModel is sh tr in
