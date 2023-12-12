@@ -315,6 +315,8 @@ module SH = struct
 
   let print (it : t) = print_string (to_string it)
 
+  let println (it : t) = print_endline (to_string it)                     
+
   let allvars (sh : t) =
     let (pure,spat) = sh in
     let fvp = SHpure.fv pure in
