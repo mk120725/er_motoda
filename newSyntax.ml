@@ -151,6 +151,12 @@ module SHspatExp = struct
 	| Pto(t,ts) -> Pto(SHterm.subst sub t, List.map (SHterm.subst sub) ts)
 	| Pr(pr,ts) -> Pr(pr, List.map (SHterm.subst sub) ts)
 	| Lab(a,p) -> Lab(a,p)
+
+  let ccp (s : t) =
+    match s with
+    | Lab(a,p) -> false
+    | _ -> true
+
 end
 
 (* Short cuts for SHspatExps *)
@@ -203,6 +209,13 @@ module SHspat = struct
     | SAtom(t) -> SAtom(SHspatExp.subst sub t) 
     | SCon(t1,t2) -> SCon(subst sub t1, subst sub t2)
     | WCon(t1,t2) -> WCon(subst sub t1, subst sub t2)
+
+  let rec ccp (s : t) =
+    match s with
+    | Emp -> true
+    | SAtom(a) -> SHspatExp.ccp a
+    | SCon(s1,s2) -> ccp s1 && ccp s2
+    | WCon(s1,s2) -> false
 end
 
 	
@@ -251,6 +264,11 @@ module SHpureExp = struct
     | Eq(t1,t2) -> Eq(SHterm.subst sub t1, SHterm.subst sub t2)
     | NEq(t1,t2) -> NEq(SHterm.subst sub t1, SHterm.subst sub t2)
     | At(a,s) -> At(a,SHspat.subst sub s)
+
+  let ccp (it : t) =
+    match it with
+    | At(a,s) -> false
+    | _ -> true
 end
 
 (* Shortcuts for SHpureExps *)
@@ -298,6 +316,11 @@ module SHpure = struct
        else SHpureExp.Eq(t1,t2)::(simpl rest)
     | p::rest ->
        p::(simpl rest)
+
+  let rec ccp (pp : t) =
+    match pp with
+    | [] -> true
+    | p::rest -> SHpureExp.ccp && ccp rest
 end
 
 (* Short cuts for SHpures *)
@@ -334,6 +357,10 @@ module SH = struct
   let add_pureexp (h : t) (t : SHpureExp.t) =
     match h with
     | (p,s) -> (t::p,s)
+
+  let ccp (h : t) =
+    match h with
+    | (pure,spat) = SHpure.ccp pure && SHspat.ccp spat
 end
 
 
@@ -373,4 +400,7 @@ module Entl = struct
 
   let add_pureexp (e : t) (t : SHpureExp.t) =
     { up = e.up; ant = SH.add_pureexp e.ant t; suc = e.suc }
+
+  let ccp (e : t) =
+    SH.ccp e.ant && SH.ccp e.suc
 end
