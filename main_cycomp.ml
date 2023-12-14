@@ -115,10 +115,14 @@ let () =
 
   
   NewSyntax.Entl.println entl;
+  (* Nomalization *)
+
   let ant = normalization entl.ant in
   let suc = normalization entl.suc in
   let nfentl = NewSyntax.Entl.create [] ant suc in
   let nfentls = [nfentl] in
+
+
   NewSyntax.Entl.println nfentl;
   let fvs = Tools.unionLst (NewSyntax.SH.fv ant) (NewSyntax.SH.fv suc) in
   let tfvs = NewSyntax.SHterm.Nil::(List.map (fun x -> NewSyntax.SHterm.Var x) fvs) in
@@ -192,15 +196,15 @@ let () =
           case_each rest (t1,t2) 
   in
 
-  let rec case_each2 (entls : NewSyntax.Entl.t list) ts : NewSyntax.Entl.t list =
+  let rec case_each_pairs (entls : NewSyntax.Entl.t list) ts : NewSyntax.Entl.t list =
     match ts with
     | [] -> entls
-    | p::rest -> case_each2 (case_each entls p) rest
+    | p::rest -> case_each_pairs (case_each entls p) rest
   in
   
   print_string "------\n";
   print_pairs tpairs;
-  print_entls (case_each2 nfentls tpairs)
+  print_entls (case_each_pairs nfentls tpairs)
 
   (*
   let ccentl = New2cc.new2cc_entl entl in
