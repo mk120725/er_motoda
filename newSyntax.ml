@@ -157,6 +157,15 @@ module SHspatExp = struct
     | Lab(a,p) -> false
     | _ -> true
 
+  let empp (s : t) =
+    | Emp -> true
+    | Pr(p,ts) ->
+       (match ts with (* p must be ls *)
+       | Nil::Nil::[] -> true
+       | _ -> false
+       )
+    | _ -> false
+  
 end
 
 (* Short cuts for SHspatExps *)
@@ -216,6 +225,14 @@ module SHspat = struct
     | SAtom(a) -> SHspatExp.ccp a
     | SCon(s1,s2) -> ccp s1 && ccp s2
     | WCon(s1,s2) -> false
+
+  let rec empp (s : t) =
+    match s with
+    | Emp -> true
+    | SAtom(a) -> SHspatExp.empp a
+    | SCon(s1,s2) -> empp s1 && empp s1
+    | WCon(s1,s2) -> false
+    
 end
 
 	
