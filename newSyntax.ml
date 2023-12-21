@@ -338,6 +338,12 @@ module SHpure = struct
     match pp with
     | [] -> true
     | p::rest -> SHpureExp.ccp && ccp rest
+
+  let rec minusL (pp : t) =
+    match pp with
+    | [] -> []
+    | At(a,s)::rest -> minusL rest
+    | p::rest -> p::(minusL rest)
 end
 
 (* Short cuts for SHpures *)
@@ -378,6 +384,10 @@ module SH = struct
   let ccp (h : t) =
     match h with
     | (pure,spat) = SHpure.ccp pure && SHspat.ccp spat
+
+  let root (h : t) =
+    match h with
+    | (pure,spat) = ["x"] (* todo *)
 end
 
 
