@@ -345,6 +345,12 @@ module SHpure = struct
     | [] -> []
     | At(a,s)::rest -> minusL rest
     | p::rest -> p::(minusL rest)
+
+  let rec findL (pp : t) (a : string) : SHspat.t =
+    match pp with
+    | [] -> Emp
+    | At(a,s)::rest -> s
+    | _::rest -> findL rest a
 end
 
 (* Short cuts for SHpures *)
@@ -386,9 +392,20 @@ module SH = struct
     match h with
     | (pure,spat) -> SHpure.ccp pure && SHspat.ccp spat
 
-  let root (h : t) =
+  let rec root (h : t) =
     match h with
-    | (pure,spat) -> ["x"] (* todo *)
+    | (pure,spat) ->
+       (match spat with
+       | Emp -> []
+       | SAtom(Emp) -> []
+       | SAtom(Pto(Var x,ts)) -> [x]
+       | SAtom(Pr(p,(Var x)::(Var y)::ts)) ->
+          if x = y then [] else [x]
+       | SAtom(Lab(a,pi)) -> root ([], SHpure.findL pure a)
+       | SAtom(_) -> []
+       | SCon(s1,s2) -> union (root (pure,s1)) (root (pure,s2))
+       | WCon(s1,s2) -> []
+       )
 end
 
 
