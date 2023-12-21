@@ -10,6 +10,7 @@ open NewSyntax
 open New2cc
 open NewParser
 open PlNormalization
+open PlLabelElimination
 open CcSatcheck
 open SlSyntax
 open CcEntlcheck
@@ -214,15 +215,14 @@ let () =
  
                                  
 (*
-  let ps = parse str in
-  let (e,dd) = ps in
+  define e as New2cc.new2cc_entl e_i;
   Opt.sayifDebug "[Entailment]";
   Opt.doifDebug (fun _ -> CcSyntax.Entl.println e) ();
   Opt.sayifDebug "";
   Opt.sayifDebug "[Inductive System]";
-  Opt.doifDebug (fun _ -> CcSyntax.IndSys.println dd) ();
+  Opt.doifDebug (fun _ -> CcSyntax.IndSys.println ls_def) ();
   Opt.sayifDebug "====================";
-  match CcEntlcheckControl.ccMain ps with
+  match CcEntlcheckControl.ccMain (e,ls_def) with
   | true -> print_endline "Valid"
   | false -> print_endline "Invalid"
  *)
