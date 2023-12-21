@@ -158,6 +158,7 @@ module SHspatExp = struct
     | _ -> true
 
   let empp (s : t) =
+    match s with
     | Emp -> true
     | Pr(p,ts) ->
        (match ts with (* p must be ls *)
@@ -337,7 +338,7 @@ module SHpure = struct
   let rec ccp (pp : t) =
     match pp with
     | [] -> true
-    | p::rest -> SHpureExp.ccp && ccp rest
+    | p::rest -> SHpureExp.ccp p && ccp rest
 
   let rec minusL (pp : t) =
     match pp with
@@ -383,11 +384,11 @@ module SH = struct
 
   let ccp (h : t) =
     match h with
-    | (pure,spat) = SHpure.ccp pure && SHspat.ccp spat
+    | (pure,spat) -> SHpure.ccp pure && SHspat.ccp spat
 
   let root (h : t) =
     match h with
-    | (pure,spat) = ["x"] (* todo *)
+    | (pure,spat) -> ["x"] (* todo *)
 end
 
 
