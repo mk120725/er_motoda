@@ -72,16 +72,23 @@ let lab_elim (etnl : NewSyntax.Entl.t) : NewSyntax.Entl.t list option =
 
     if (p_ant =/ p_suc)
     then
-      
+      (*e11*)::(*e12*)
     else
-      (*invalid*)
+      None
   
+  if (Tools.elimElemLstL lab_suc lab_ant <> [])
+  then
+    if (p_ant </ Ratio.make_ratio 1 1 & )
+    None
 
 
 let rec lab_elims (etnls : NewSyntax.Entl.t list) : NewSyntax.Entl.t list = 
   match entls with
   | [] -> []
   | t::rest ->
+    (lab_elim t)::lab_elims rest 
+
+  (*
     let lab_ant = NewSyntax.SH.lab t.ant in
     let lab_suc = NewSyntax.SH.lab t.suc in
     if (Tools.unionLst lab_ant lab_suc = [])
@@ -104,3 +111,4 @@ let rec lab_elims (etnls : NewSyntax.Entl.t list) : NewSyntax.Entl.t list =
     if (Tools.elimElemLstL lab_suc lab_ant <> [])
     then
       (*e11*)::(*e12*)::(lab_elims rest)
+  *)
