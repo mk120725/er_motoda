@@ -63,9 +63,10 @@ let rec lab_elim (entl : NewSyntax.Entl.t) : NewSyntax.Entl.t list option =
   then
     None
   
-  else 
+  else if (Tools.elimElemLstL lab_suc lab_ant <> [])
+  then
     match Tools.elimElemLstL lab_suc lab_ant with
-    | [] -> 
+    | [] -> None
     | s::rest ->
       let (spat1_ant,pure1_ant,p_ant,spat2_ant) = extract_label entl.ant s in
       if (p_ant </ Ratio.make_ratio 1 1)
