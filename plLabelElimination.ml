@@ -71,13 +71,13 @@ let rec lab_elim (entl : NewSyntax.Entl.t) : NewSyntax.Entl.t list option =
       let (spat1_ant,pure1_ant,p_ant,spat2_ant) = extract_label entl.ant s in
       if (p_ant </ Ratio.make_ratio 1 1)
       then
-        (if (NewSytax.SHspat.empp spat1_ant)
+        if (NewSyntax.SHspat.empp spat1_ant)
         then
-          lab_elims [{ up = entl.up; ant = (pure1_ant,spat2_ant); suc = entl.suc }]
+          lab_elims [NewSyntax.Entl.create entl.up (pure1_ant,spat2_ant) entl.suc ]
         else
-          None)
+          None
       else
-      lab_elims [{ up = entl.up; ant = (pure1_ant,SCon(spat1_ant,spat2_ant)); suc = entl.suc }]
+        lab_elims [NewSyntax.Entl.create entl.up (pure1_ant,SCon(spat1_ant,spat2_ant)) entl.suc ]
   
   else 
     let lab_inter = Tools.interLst lab_ant lab_suc in 
@@ -88,24 +88,24 @@ let rec lab_elim (entl : NewSyntax.Entl.t) : NewSyntax.Entl.t list option =
       let (spat1_suc,pure1_suc,p_suc,spat2_suc) = extract_label entl.suc s in
       if (p_ant =/ p_suc)
       then
-        lab_elims [{up  = Tools.unionLst entl.up (NewSyntax.SH.root (pure1_ant, spat2_ant)) ;
-                    ant = (NewSyntax.SHpure.minusL pure1_ant,spat1_ant);
-                    suc = (NewSyntax.SHpure.minusL pure1_suc,spat1_suc)};
-                   {up  = Tools.unionLst entl.up (NewSyntax.SH.root ([], spat1_ant)) ;
-                    ant = (pure1_ant,spat2_ant);
-                    suc = (pure1_suc,spat2_suc)}]
-      else if (NewSytax.SHspat.empp spat1_ant)
+        lab_elims [NewSyntax.Entl.create (Tools.unionLst entl.up (NewSyntax.SH.root (pure1_ant, spat2_ant))) 
+                    (NewSyntax.SHpure.minusL pure1_ant,spat1_ant)
+                    (NewSyntax.SHpure.minusL pure1_suc,spat1_suc);
+                  NewSyntax.Entl.create (Tools.unionLst entl.up (NewSyntax.SH.root ([], spat1_ant))) 
+                    (pure1_ant,spat2_ant)
+                    (pure1_suc,spat2_suc)]
+      else if (NewSyntax.SHspat.empp spat1_ant)
       then 
-        lab_elims [{up  = Tools.unionLst entl.up (NewSyntax.SH.root (pure1_ant, spat2_ant)) ;
-                    ant = (NewSyntax.SHpure.minusL pure1_ant,NewSyntax.SHspat.Emp);
-                    suc = (NewSyntax.SHpure.minusL pure1_suc,spat1_suc)};
-                   {up  = entl.up;
-                    ant = (pure1_ant,spat2_ant);
-                    suc = (pure1_suc,spat2_suc)}]
+        lab_elims [NewSyntax.Entl.create (Tools.unionLst entl.up (NewSyntax.SH.root (pure1_ant, spat2_ant)))
+                    (NewSyntax.SHpure.minusL pure1_ant,NewSyntax.SHspat.Emp)
+                    (NewSyntax.SHpure.minusL pure1_suc,spat1_suc);
+                  NewSyntax.Entl.create entl.up
+                    (pure1_ant,spat2_ant)
+                    (pure1_suc,spat2_suc)]
       else
         None
 
-and lab_elims (etnls : NewSyntax.Entl.t list) : NewSyntax.Entl.t list option = 
+and lab_elims (entls : NewSyntax.Entl.t list) : NewSyntax.Entl.t list option = 
   match entls with
   | [] -> Some []
   | t::rest ->

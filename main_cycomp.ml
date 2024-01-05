@@ -203,9 +203,15 @@ let () =
     | p::rest -> case_each_pairs (case_each entls p) rest
   in
   
+  let ca_entls = case_each_pairs nfentls tpairs in
+  let le_entls = 
+    match PlLabelElimination.lab_elims ca_entls with
+    | None -> [](*Invalid*)
+    | Some entls -> entls
+  in
+
   print_string "------\n";
-  print_pairs tpairs;
-  print_entls (case_each_pairs nfentls tpairs)
+  print_entls le_entls;
 
   (*
   let ccentl = New2cc.new2cc_entl entl in
