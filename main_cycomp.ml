@@ -204,6 +204,12 @@ let () =
   in
   
   let ca_entls = case_each_pairs nfentls tpairs in
+
+  (*
+  print_string "------\n";
+  print_entls ca_entls;
+   *)
+  
   let le_entls = 
     match PlLabelElimination.lab_elims ca_entls with
     | None -> [](*Invalid*)
@@ -213,12 +219,17 @@ let () =
   print_string "------\n";
   print_entls le_entls;
 
-  (*
-  let ccentl = New2cc.new2cc_entl entl in
-  
-  CcSyntax.Entl.println ccentl;
-   *)
- 
+  let rec print_entls_cc ts =
+    match ts with
+    | [] -> ()
+    | t::rest -> CcSyntax.Entl.println t;
+                 print_entls_cc rest
+  in
+
+
+  let cc_le_entls = List.map New2cc.new2cc_entl le_entls in
+  print_string "------\n";
+  print_entls_cc cc_le_entls;
                                  
 (*
   define e as New2cc.new2cc_entl e_i;
