@@ -1,3 +1,3 @@
-y<>x & z<>w & @(a,ls(y,x)) && ls(x,y) w* a^(2/4) * ls(z,w)
+y<>x & @(a,Emp) && ls(x,y) * a^(2/4)
 |-
-ls(x,y) * a^(1/1)
+@(a,Emp) && ls(x,y) * a^(1/1)

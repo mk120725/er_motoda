@@ -399,8 +399,9 @@ module SH = struct
        | Emp -> []
        | SAtom(Emp) -> []
        | SAtom(Pto(Var x,ts)) -> [x]
-       | SAtom(Pr(p,(Var x)::(Var y)::ts)) ->
-          if x = y then [] else [x]
+(*       | SAtom(Pr(p,(Var x)::(Var y)::ts)) ->
+          if x = y then [] else [x] *)
+       | SAtom(Pr(p,(Var x)::ts)) -> [x]
        | SAtom(Lab(a,pi)) -> root ([], SHpure.findL pure a)
        | SAtom(_) -> []
        | SCon(s1,s2) -> union (root (pure,s1)) (root (pure,s2))
@@ -448,4 +449,22 @@ module Entl = struct
 
   let ccp (e : t) =
     SH.ccp e.ant && SH.ccp e.suc
+
+  let rec eq_sub_pure (e : t) (pure : SHpure.t) =
+    match pure with
+      [] -> e
+    | Eq(t1,t2)::rest ->
+       let sub = 
+         match (t1,t2) with
+         | (SHterm.Nil, SHterm.Nil) -> []
+         | (SHterm.Nil, SHterm.Var s) -> [(s,SHterm.Nil)]
+         | (SHterm.Var s,_) -> [(s,t2)]  
+       in
+       eq_sub_pure (subst sub e) rest
+    | _::rest -> eq_sub_pure e rest
+  
+  let eq_sub (e : t) =
+    let (pure,_) = e.ant in
+    eq_sub_pure e pure
+
 end

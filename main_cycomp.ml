@@ -115,7 +115,9 @@ let () =
   (*CcSyntax.IndSys.println ls_def; *)
 
   
+  print_string "------input------\n";
   NewSyntax.Entl.println entl;
+
   (* Nomalization *)
 
   let ant = normalization entl.ant in
@@ -123,8 +125,10 @@ let () =
   let nfentl = NewSyntax.Entl.create [] ant suc in
   let nfentls = [nfentl] in
 
-
+  
+  print_string "------normalizaiton------\n";
   NewSyntax.Entl.println nfentl;
+  
   let fvs = Tools.unionLst (NewSyntax.SH.fv ant) (NewSyntax.SH.fv suc) in
   let tfvs = NewSyntax.SHterm.Nil::(List.map (fun x -> NewSyntax.SHterm.Var x) fvs) in
   let tpairs = Tools.makeCombPairs tfvs in
@@ -160,10 +164,12 @@ let () =
     CcSatcheck.decideSatMain(ccent,ls_def)
   in
 
+  (*
   print_string "---new2cc---\n";
   CcSyntax.Entl.println (New2cc.new2cc_entl nfentl);
   print_string "------\n";
-  
+   *)
+
   (* case_each [ent1;...; entn] (t1,t2) -> entailment_list
      for each enti, add t1=t2 & enti, t1/=t2 & enti
      then, newsatcheck for each entailment *)
@@ -171,14 +177,17 @@ let () =
     match entls with 
     | [] -> []
     | t::rest -> 
-      let sub = 
+       (*
+       let sub = 
         match (t1,t2) with
         | (NewSyntax.SHterm.Nil,NewSyntax.SHterm.Nil) -> []
         | (NewSyntax.SHterm.Nil,NewSyntax.SHterm.Var s) -> [(s,NewSyntax.SHterm.Nil)]
         | (NewSyntax.SHterm.Var s,_) -> [(s,t2)]  
       in
+        *)
       let case_eq  = 
-        NewSyntax.Entl.subst sub t in 
+        (* NewSyntax.Entl.subst sub t in *)
+        NewSyntax.Entl.add_pureexp t (NewSyntax.SHpureExp.Eq(t1,t2)) in 
       let case_neq = 
         NewSyntax.Entl.add_pureexp t (NewSyntax.SHpureExp.NEq(t1,t2)) in 
 
@@ -205,10 +214,13 @@ let () =
   
   let ca_entls = case_each_pairs nfentls tpairs in
 
-  (*
-  print_string "------\n";
+  print_string "------case analysis------\n";
   print_entls ca_entls;
-  *)
+
+  let ca_entls = List.map NewSyntax.Entl.eq_sub ca_entls in
+
+  print_string "------case analysis2------\n";
+  print_entls ca_entls;
   
   let le_entls = 
     match PlLabelElimination.lab_elims ca_entls with
@@ -216,7 +228,7 @@ let () =
     | Some entls -> entls
   in
 
-  print_string "------\n";
+  print_string "------label elimination------\n";
   print_entls le_entls;
 
   let rec print_entls_cc ts =
@@ -229,7 +241,7 @@ let () =
 
   let cc_le_entls = List.map New2cc.new2cc_entl le_entls in
 
-  print_string "------\n";
+  print_string "------new2cc------\n";
   print_entls_cc cc_le_entls;
 
 
