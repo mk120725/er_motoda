@@ -208,7 +208,7 @@ let () =
   (*
   print_string "------\n";
   print_entls ca_entls;
-   *)
+  *)
   
   let le_entls = 
     match PlLabelElimination.lab_elims ca_entls with
@@ -228,9 +228,11 @@ let () =
 
 
   let cc_le_entls = List.map New2cc.new2cc_entl le_entls in
+
   print_string "------\n";
   print_entls_cc cc_le_entls;
-                                 
+
+
 (*
   define e as New2cc.new2cc_entl e_i;
   Opt.sayifDebug "[Entailment]";
@@ -243,4 +245,6 @@ let () =
   | true -> print_endline "Valid"
   | false -> print_endline "Invalid"
  *)
-;;
+ 
+ ;;
+ 
