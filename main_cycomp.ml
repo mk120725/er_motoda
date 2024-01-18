@@ -251,7 +251,8 @@ let () =
       if (CcEntlcheckControl.ccMain (t,ls_def))
       then
         entls_check rest
-      else print_endline "Invalid"
+      else 
+        print_endline "Invalid"
   in
       
   print_string "------entls_check------\n";
