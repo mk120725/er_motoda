@@ -148,6 +148,25 @@ let () =
                  print_entls rest
   in
 
+  let print_entls_op ts_op =
+    match ts_op with
+    | None -> print_string "None\n"
+    | Some ts -> print_entls ts
+  in
+
+  let rec print_entls_cc ts =
+    match ts with
+    | [] -> ()
+    | t::rest -> CcSyntax.Entl.println t;
+                 print_entls_cc rest
+  in
+
+  let print_entls_cc_op ts_op =
+    match ts_op with
+    | None -> print_string "None\n"
+    | Some ts -> print_entls_cc ts
+  in
+
   let rec print_pairs ps =
     match ps with
     | [] -> ()
@@ -224,27 +243,22 @@ let () =
   
   let le_entls = 
     match PlLabelElimination.lab_elims ca_entls with
-    | None -> [](*Invalid*)
-    | Some entls -> entls
+    | None -> None
+    | Some entls -> Some entls
   in
 
   print_string "------label elimination------\n";
-  print_entls le_entls;
+  print_entls_op le_entls;
 
-  let rec print_entls_cc ts =
-    match ts with
-    | [] -> ()
-    | t::rest -> CcSyntax.Entl.println t;
-                 print_entls_cc rest
-  in
-
-
-  let cc_le_entls = List.map New2cc.new2cc_entl le_entls in
+  let cc_le_entls =
+    match le_entls with
+      None -> None
+    | Some entls -> Some (List.map New2cc.new2cc_entl entls) in
 
   print_string "------new2cc------\n";
-  print_entls_cc cc_le_entls;
+  print_entls_cc_op cc_le_entls;
 
-  let rec entls_check ts= 
+  let rec entls_check ts = 
     match ts with 
     | [] -> print_endline "Valid"
     | t::rest -> 
@@ -254,9 +268,15 @@ let () =
       else 
         print_endline "Invalid"
   in
-      
+
+  let entls_check_op ts_op =
+    match ts_op with
+    | None -> print_endline "Invalid"
+    | Some ts -> entls_check ts
+  in
+  
   print_string "------entls_check------\n";
-  entls_check cc_le_entls;
+  entls_check_op cc_le_entls;
 (*
   define e as New2cc.new2cc_entl e_i;
   Opt.sayifDebug "[Entailment]";
