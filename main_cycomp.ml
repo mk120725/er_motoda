@@ -244,7 +244,18 @@ let () =
   print_string "------new2cc------\n";
   print_entls_cc cc_le_entls;
 
-
+  let rec entls_check ts= 
+    match ts with 
+    | [] -> print_endline "Valid"
+    | t::rest -> 
+      if (CcEntlcheckControl.ccMain (t,ls_def))
+      then
+        entls_check rest
+      else print_endline "Invalid"
+  in
+      
+  print_string "------entls_check------\n";
+  entls_check cc_le_entls;
 (*
   define e as New2cc.new2cc_entl e_i;
   Opt.sayifDebug "[Entailment]";
@@ -253,6 +264,7 @@ let () =
   Opt.sayifDebug "[Inductive System]";
   Opt.doifDebug (fun _ -> CcSyntax.IndSys.println ls_def) ();
   Opt.sayifDebug "====================";
+
   match CcEntlcheckControl.ccMain (e,ls_def) with
   | true -> print_endline "Valid"
   | false -> print_endline "Invalid"
