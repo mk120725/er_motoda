@@ -10,20 +10,10 @@ let renameStrL rr vv = List.map (renameStr rr) vv
 ;;
 let dropfilter cond = List.filter (fun x -> not(cond x))
 ;;
-let rec add t ts =
-  match ts with
-  | [] -> [t]
-  | t1::rest -> if t=t1 then (add t rest) else t1::(add t rest)
-;;
-let rec union l1 l2 =
-  match l1 with
-  | [] -> l2
-  | t::rest -> union rest (add t l2)
-;;
 let rec map_union f l =
   match l with
   | [] -> []
-  | x::rest -> union (f x) (map_union f rest)
+  | x::rest -> Tools.unionLst (f x) (map_union f rest)
 
 (*----------------------------------------------*)
 (* Terms of Symbolic Heap                       *)
@@ -110,7 +100,7 @@ module SHspatExp = struct
   let rec fv s =
     match s with
     | Emp -> []
-    | Pto(t,ts) -> union (SHterm.fv t) (SHterm.fvs ts)
+    | Pto(t,ts) -> Tools.unionLst (SHterm.fv t) (SHterm.fvs ts)
     | Pr(pr,ts) -> (SHterm.fvs ts)
     | Lab(a,p) -> []
 
@@ -185,15 +175,15 @@ module SHspat = struct
     match s with
     | Emp -> []
     | SAtom(a) -> SHspatExp.fv a
-    | SCon(s1,s2) -> union (fv s1) (fv s2)
-    | WCon(s1,s2) -> union (fv s1) (fv s2)
+    | SCon(s1,s2) -> Tools.unionLst (fv s1) (fv s2)
+    | WCon(s1,s2) -> Tools.unionLst (fv s1) (fv s2)
 
   let rec lab s =
     match s with
     | Emp -> []
     | SAtom(a) -> SHspatExp.lab a
-    | SCon(s1,s2) -> union (lab s1) (lab s2)
-    | WCon(s1,s2) -> union (lab s1) (lab s2)
+    | SCon(s1,s2) -> Tools.unionLst (lab s1) (lab s2)
+    | WCon(s1,s2) -> Tools.unionLst (lab s1) (lab s2)
   
   let rec to_string (sigma : t) =
     match sigma with
@@ -251,8 +241,8 @@ module SHpureExp = struct
 
   let rec fv p =
     match p with
-    | Eq(t1,t2) -> union (SHterm.fv t1) (SHterm.fv t2)
-    | NEq(t1,t2) -> union (SHterm.fv t1) (SHterm.fv t2)
+    | Eq(t1,t2) -> Tools.unionLst (SHterm.fv t1) (SHterm.fv t2)
+    | NEq(t1,t2) -> Tools.unionLst (SHterm.fv t1) (SHterm.fv t2)
     | At(a,s) -> SHspat.fv s
 
   let rec lab p =
@@ -365,9 +355,10 @@ module SH = struct
   (* h is used *)
   type t = SHpure.t * SHspat.t
 
-  let fv (pure,spat) = union (SHpure.fv pure) (SHspat.fv spat)
+  let fv (pure,spat) = Tools.unionLst (SHpure.fv pure) (SHspat.fv spat)
 
-  let lab (pure,spat) = union (SHpure.lab pure) (SHspat.lab spat)
+  let lab (pure,spat) = (* Tools.unionLst (SHpure.lab pure) *)
+    (SHspat.lab spat) 
 
   let to_string (pure,spat) =
 	let piPart = "pi:[" ^ (SHpure.to_string pure) ^ "], " in
@@ -404,7 +395,7 @@ module SH = struct
        | SAtom(Pr(p,(Var x)::ts)) -> [x]
        | SAtom(Lab(a,pi)) -> root ([], SHpure.findL pure a)
        | SAtom(_) -> []
-       | SCon(s1,s2) -> union (root (pure,s1)) (root (pure,s2))
+       | SCon(s1,s2) -> Tools.unionLst (root (pure,s1)) (root (pure,s2))
        | WCon(s1,s2) -> []
        )
 end
@@ -424,9 +415,9 @@ module Entl = struct
 
   let create up ant suc = { up = up; ant = ant; suc = suc }
   
-  let fv e = union (SH.fv e.ant) (SH.fv e.suc)
+  let fv e = Tools.unionLst (SH.fv e.ant) (SH.fv e.suc)
 
-  let lab e = union (SH.lab e.ant) (SH.lab e.suc)
+  let lab e = Tools.unionLst (SH.lab e.ant) (SH.lab e.suc)
 
   let to_string (e : t) =
     let up = string_of_list (fun s -> s) "," e.up in

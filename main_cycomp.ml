@@ -261,10 +261,16 @@ let () =
   let rec entls_check ts = 
     match ts with 
     | [] -> print_endline "Valid"
-    | t::rest -> 
+    | t::rest ->
+       CcSyntax.Entl.println t;
+       exit 0;
       if (CcEntlcheckControl.ccMain (t,ls_def))
       then
-        entls_check rest
+        (
+          print_string "ok\n";
+          exit 0;
+          entls_check rest
+        )
       else 
         print_endline "Invalid"
   in
@@ -274,7 +280,7 @@ let () =
     | None -> print_endline "Invalid"
     | Some ts -> entls_check ts
   in
-  
+
   print_string "------entls_check------\n";
   entls_check_op cc_le_entls;
 (*

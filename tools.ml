@@ -734,4 +734,9 @@ let mkAllMapGroup func ll =
   !res
   
 end
+
+let rec print_labels ss =
+  match ss with
+    [] -> print_string "\n"
+  | s::rest -> print_string (s ^ ", "); print_labels rest
 ;;
