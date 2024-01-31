@@ -263,12 +263,10 @@ let () =
     | [] -> print_endline "Valid"
     | t::rest ->
        CcSyntax.Entl.println t;
-       exit 0;
       if (CcEntlcheckControl.ccMain (t,ls_def))
       then
         (
-          print_string "ok\n";
-          exit 0;
+          print_endline "ok";
           entls_check rest
         )
       else 
