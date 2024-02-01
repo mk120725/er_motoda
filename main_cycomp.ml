@@ -253,7 +253,9 @@ let () =
   let cc_le_entls =
     match le_entls with
       None -> None
-    | Some entls -> Some (List.map New2cc.new2cc_entl entls) in
+    | Some entls -> Some (List.map New2cc.new2cc_entl
+                            (List.map NewSyntax.Entl.erase_up
+                               (List.map NewSyntax.Entl.erase_pure entls))) in
 
   print_string "------new2cc------\n";
   print_entls_cc_op cc_le_entls;

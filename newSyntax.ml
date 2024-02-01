@@ -341,6 +341,15 @@ module SHpure = struct
     | [] -> Emp
     | At(a,s)::rest -> s
     | _::rest -> findL rest a
+
+  let rec erase_pure (pp : t) (xs : string list) =
+    match pp with
+      [] -> []
+    | (At(a,sg) as p)::rest -> p::(erase_pure rest xs)
+    | p::rest ->
+       match (Tools.elimElemLstL xs (SHpureExp.fv p)) with
+         [] -> p::(erase_pure rest xs)
+       | _ -> erase_pure rest xs
 end
 
 (* Short cuts for SHpures *)
@@ -458,4 +467,13 @@ module Entl = struct
     let (pure,_) = e.ant in
     eq_sub_pure e pure
 
+  let erase_up entl =
+    let fvs = Tools.unionLst (SH.fv entl.ant) (SH.fv entl.suc) in
+    { up = Tools.interLst fvs entl.up; ant = entl.ant; suc = entl.suc }
+
+  let erase_pure entl =
+    let (pure_ant, spat_ant) = entl.ant in
+    let fvs = Tools.unionLst (SHspat.fv spat_ant) (SH.fv entl.suc) in
+    let new_pure_ant = SHpure.erase_pure pure_ant fvs in
+    { up = entl.up; ant = (new_pure_ant, spat_ant); suc = entl.suc }
 end
