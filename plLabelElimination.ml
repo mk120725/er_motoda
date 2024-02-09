@@ -5,13 +5,15 @@ open Ratio;;
 let rec extract_label_pure (pure1 : NewSyntax.SHpure.t) (s : string) (pure2 : NewSyntax.SHpure.t) =
   match pure1 with 
   | [] -> pure2
-  | At(a,spat)::rest -> pure2 @ rest
+  | At(a,spat)::rest ->
+     if (a = s) then (pure2 @ rest) else (extract_label_pure rest s (At(a,spat)::pure2))
   | p::rest -> extract_label_pure rest s (p::pure2)
 
 let rec extract_label_spat1 (pure1 : NewSyntax.SHpure.t) (s : string) =
   match pure1 with 
   | [] -> NewSyntax.SHspat.Emp
-  | At(a,spat)::rest -> spat
+  | At(a,spat)::rest ->
+     if (a = s) then spat else (extract_label_spat1 rest s)
   | p::rest -> extract_label_spat1 rest s 
 
 let rec extract_label_perm (spat : NewSyntax.SHspat.t) (s : string) =
@@ -56,6 +58,8 @@ let extract_label (t : NewSyntax.SH.t) (s : string) =
 let rec lab_elim (entl : NewSyntax.Entl.t) : NewSyntax.Entl.t list option =
   let lab_ant = NewSyntax.SH.lab entl.ant in
   let lab_suc = NewSyntax.SH.lab entl.suc in
+  (* print_string "---lab_ant---\n";
+  Tools.print_labels lab_ant; *)
   if (Tools.unionLst lab_ant lab_suc = [])
   then
     Some [entl]
@@ -68,23 +72,28 @@ let rec lab_elim (entl : NewSyntax.Entl.t) : NewSyntax.Entl.t list option =
     match Tools.elimElemLstL lab_suc lab_ant with
     | [] -> None
     | s::rest ->
-      let (spat1_ant,pure1_ant,p_ant,spat2_ant) = extract_label entl.ant s in
-      if (p_ant </ Ratio.make_ratio 1 1)
-      then
-        if (NewSyntax.SHspat.empp spat1_ant)
-        then
-          lab_elims [NewSyntax.Entl.create entl.up (pure1_ant,spat2_ant) entl.suc ]
-        else
-          None
-      else
-        lab_elims [NewSyntax.Entl.create entl.up (pure1_ant,SCon(spat1_ant,spat2_ant)) entl.suc ]
-  
+       let (spat1_ant,pure1_ant,p_ant,spat2_ant) = extract_label entl.ant s in
+       if (p_ant </ Ratio.make_ratio 1 1)
+       then
+         if (NewSyntax.SHspat.empp spat1_ant)
+         then
+           lab_elims [NewSyntax.Entl.create entl.up (pure1_ant,spat2_ant) entl.suc ]
+         else
+           None
+       else
+         lab_elims [NewSyntax.Entl.create entl.up (pure1_ant,SCon(spat1_ant,spat2_ant)) entl.suc ]
   else 
     let lab_inter = Tools.interLst lab_ant lab_suc in 
     match lab_inter with
     | [] -> None
     | s::rest ->
       let (spat1_ant,pure1_ant,p_ant,spat2_ant) = extract_label entl.ant s in
+       print_string "---extract_label---\n";
+       (* NewSyntax.SH.println entl.ant;
+       print_string ("label: " ^ s ^ "\n");
+       NewSyntax.SHspat.println spat1_ant;
+       NewSyntax.SHpure.println pure1_ant;
+       NewSyntax.SHspat.println spat2_ant;*)
       let (spat1_suc,pure1_suc,p_suc,spat2_suc) = extract_label entl.suc s in
       if (p_ant =/ p_suc)
       then
