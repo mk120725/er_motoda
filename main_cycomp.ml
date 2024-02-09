@@ -253,7 +253,9 @@ let () =
   let cc_le_entls =
     match le_entls with
       None -> None
-    | Some entls -> Some (List.map New2cc.new2cc_entl entls) in
+    | Some entls -> Some (List.map New2cc.new2cc_entl
+                            (List.map NewSyntax.Entl.erase_up
+                               (List.map NewSyntax.Entl.erase_pure entls))) in
 
   print_string "------new2cc------\n";
   print_entls_cc_op cc_le_entls;
@@ -261,10 +263,14 @@ let () =
   let rec entls_check ts = 
     match ts with 
     | [] -> print_endline "Valid"
-    | t::rest -> 
+    | t::rest ->
+       CcSyntax.Entl.println t;
       if (CcEntlcheckControl.ccMain (t,ls_def))
       then
-        entls_check rest
+        (
+          print_endline "ok";
+          entls_check rest
+        )
       else 
         print_endline "Invalid"
   in
@@ -274,7 +280,7 @@ let () =
     | None -> print_endline "Invalid"
     | Some ts -> entls_check ts
   in
-  
+
   print_string "------entls_check------\n";
   entls_check_op cc_le_entls;
 (*
