@@ -55,13 +55,6 @@ let rec norm_p (pure : SHpure.t) (labs : string list) : SHpure.t =
             At(a,Emp)::pure
         else At(a,spat)::(norm_p rest labs)
 
-(* extract_labels s1n labels -> (spat1, spat2)
-      s1n = spatial formulas without WCon
-      labels = list of labels
-      spat1 = label part of s1n (list)
-      spat2 = rest of s1n
- *)
-
 let rec extract_labels (spat : SHspat.t) (labs : string list) : SHspatExp.t list * SHspat.t=
   match spat with
   | Emp -> ([],Emp)
@@ -80,10 +73,6 @@ let rec check_lab a (s : SHspatExp.t) =
   match s with
   | Lab (b,_) -> a = b
   | _ -> false
-
-(* findOption : (SHspatExp -> bool) -> SHspatExp list -> SHspatExp option
-   check_lab : string -> SHspatExp -> bool
-   check_lab a : SHspatExp -> bool *)
 
 let rec add_permission (l1 : SHspatExp.t list) (l2 : SHspatExp.t list) : SHspat.t =
   match l1 with

@@ -118,6 +118,7 @@ let () =
   print_string "------input------\n";
   NewSyntax.Entl.println entl;
 
+  let start = Sys.time() in
   (* Nomalization *)
 
   let ant = normalization entl.ant in
@@ -283,6 +284,12 @@ let () =
 
   print_string "------entls_check------\n";
   entls_check_op cc_le_entls;
+
+  let end_ = Sys.time () in
+
+  let time = end_ -. start in
+
+  Printf.printf "time:%f" time;
 (*
   define e as New2cc.new2cc_entl e_i;
   Opt.sayifDebug "[Entailment]";

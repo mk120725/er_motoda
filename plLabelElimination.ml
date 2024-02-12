@@ -58,8 +58,6 @@ let extract_label (t : NewSyntax.SH.t) (s : string) =
 let rec lab_elim (entl : NewSyntax.Entl.t) : NewSyntax.Entl.t list option =
   let lab_ant = NewSyntax.SH.lab entl.ant in
   let lab_suc = NewSyntax.SH.lab entl.suc in
-  (* print_string "---lab_ant---\n";
-  Tools.print_labels lab_ant; *)
   if (Tools.unionLst lab_ant lab_suc = [])
   then
     Some [entl]
@@ -88,12 +86,6 @@ let rec lab_elim (entl : NewSyntax.Entl.t) : NewSyntax.Entl.t list option =
     | [] -> None
     | s::rest ->
       let (spat1_ant,pure1_ant,p_ant,spat2_ant) = extract_label entl.ant s in
-       print_string "---extract_label---\n";
-       (* NewSyntax.SH.println entl.ant;
-       print_string ("label: " ^ s ^ "\n");
-       NewSyntax.SHspat.println spat1_ant;
-       NewSyntax.SHpure.println pure1_ant;
-       NewSyntax.SHspat.println spat2_ant;*)
       let (spat1_suc,pure1_suc,p_suc,spat2_suc) = extract_label entl.suc s in
       if (p_ant =/ p_suc)
       then
@@ -124,28 +116,3 @@ and lab_elims (entls : NewSyntax.Entl.t list) : NewSyntax.Entl.t list option =
       (match lab_elims rest with
       | None -> None
       | Some es2 -> Some (es1 @ es2))
-
-  (*
-    let lab_ant = NewSyntax.SH.lab t.ant in
-    let lab_suc = NewSyntax.SH.lab t.suc in
-    if (Tools.unionLst lab_ant lab_suc = [])
-    then
-      t::(lab_elim rest)
-    if (Tools.elimElemLstL lab_ant lab_suc <> [])
-    then
-      (*invalid*)
-    
-    let lab_inter = Tools.interLst lab_ant lab_suc in 
-    if (lab_inter <> [])
-    then
-      get_permisson 
-
-      if ((*pi=delta*))
-      then
-
-      else
-        (*invalid*)
-    if (Tools.elimElemLstL lab_suc lab_ant <> [])
-    then
-      (*e11*)::(*e12*)::(lab_elims rest)
-  *)
