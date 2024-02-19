@@ -71,32 +71,6 @@ let () =
   if !_fname = "" then display_message () else
   let str = inputstr_file !_fname in
   let entl = parse str in
-  (* 
-
-     1. normalization : newSyntax.SH.t -> newSyntax.SH.t
-
-     let entl_nf : NewSyntax.Entl
-     = { up = []; ant = normalize entl.ant; suc = normalize entl.suc }
-     
-     2. case_analysis : newSyntax.Entl -> newSyntax.Entl list
-     
-     let entls_inj : NewSyntax.Entl list
-     = case_analysis entl_nf
-     
-     3. label-elim : newSyntax.Entl.t -> newSyntax.Entl.t list
-     
-     let entls_lf : NewSyntax.Entl list
-     = List.Fold_left (@) [] (List.map label_elim entls_inj)
-
-     4. data translation from newSyntax to ccSyntax
-
-     let entls_cc : CcSyntax.Entl list
-     = List.map new2cc entls_lf
-   *)
-
-  (* inductive def. for ls(x,y) (nonempty)
-     ls(x,y) = x->y | ex z(x->z * ls(z,y) *)
-
   (* def of ls *)
   let var = CcSyntax.var in
   let ls_def : CcSyntax.IndSys.t = [
@@ -112,8 +86,6 @@ let () =
        ]
       )
     ] in
-  (*CcSyntax.IndSys.println ls_def; *)
-
   
   print_string "------input------\n";
   NewSyntax.Entl.println entl;
@@ -133,14 +105,6 @@ let () =
   let fvs = Tools.unionLst (NewSyntax.SH.fv ant) (NewSyntax.SH.fv suc) in
   let tfvs = NewSyntax.SHterm.Nil::(List.map (fun x -> NewSyntax.SHterm.Var x) fvs) in
   let tpairs = Tools.makeCombPairs tfvs in
-
-  (* for debug *)
-  let rec print_terms ts =
-    match ts with
-    | [] -> ()
-    | t::rest -> NewSyntax.SHterm.println t;
-                 print_terms rest
-  in
   
   let rec print_entls ts =
     match ts with
@@ -168,45 +132,17 @@ let () =
     | Some ts -> print_entls_cc ts
   in
 
-  let rec print_pairs ps =
-    match ps with
-    | [] -> ()
-    | (t1,t2)::rest -> print_string(
-                           "(" ^ (NewSyntax.SHterm.to_string t1)
-                           ^ ","
-                           ^ (NewSyntax.SHterm.to_string t2) ^ ")\n");
-                       print_pairs rest
-  in
-
   (* Case analysis *)
   let newsatcheck (ent : NewSyntax.Entl.t) =
     let ccent = New2cc.new2cc_entl ent in
     CcSatcheck.decideSatMain(ccent,ls_def)
   in
 
-  (*
-  print_string "---new2cc---\n";
-  CcSyntax.Entl.println (New2cc.new2cc_entl nfentl);
-  print_string "------\n";
-   *)
-
-  (* case_each [ent1;...; entn] (t1,t2) -> entailment_list
-     for each enti, add t1=t2 & enti, t1/=t2 & enti
-     then, newsatcheck for each entailment *)
   let rec case_each (entls : NewSyntax.Entl.t list) (t1,t2) : NewSyntax.Entl.t list =
     match entls with 
     | [] -> []
     | t::rest -> 
-       (*
-       let sub = 
-        match (t1,t2) with
-        | (NewSyntax.SHterm.Nil,NewSyntax.SHterm.Nil) -> []
-        | (NewSyntax.SHterm.Nil,NewSyntax.SHterm.Var s) -> [(s,NewSyntax.SHterm.Nil)]
-        | (NewSyntax.SHterm.Var s,_) -> [(s,t2)]  
-      in
-        *)
       let case_eq  = 
-        (* NewSyntax.Entl.subst sub t in *)
         NewSyntax.Entl.add_pureexp t (NewSyntax.SHpureExp.Eq(t1,t2)) in 
       let case_neq = 
         NewSyntax.Entl.add_pureexp t (NewSyntax.SHpureExp.NEq(t1,t2)) in 
@@ -234,13 +170,17 @@ let () =
   
   let ca_entls = case_each_pairs nfentls tpairs in
 
+  
   print_string "------case analysis------\n";
   print_entls ca_entls;
+  
 
   let ca_entls = List.map NewSyntax.Entl.eq_sub ca_entls in
 
+  
   print_string "------case analysis2------\n";
   print_entls ca_entls;
+  
   
   let le_entls = 
     match PlLabelElimination.lab_elims ca_entls with
@@ -290,19 +230,6 @@ let () =
   let time = end_ -. start in
 
   Printf.printf "time:%f" time;
-(*
-  define e as New2cc.new2cc_entl e_i;
-  Opt.sayifDebug "[Entailment]";
-  Opt.doifDebug (fun _ -> CcSyntax.Entl.println e) ();
-  Opt.sayifDebug "";
-  Opt.sayifDebug "[Inductive System]";
-  Opt.doifDebug (fun _ -> CcSyntax.IndSys.println ls_def) ();
-  Opt.sayifDebug "====================";
-
-  match CcEntlcheckControl.ccMain (e,ls_def) with
-  | true -> print_endline "Valid"
-  | false -> print_endline "Invalid"
- *)
  
  ;;
  
